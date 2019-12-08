@@ -2,45 +2,39 @@ package io.zipcoder.tc_spring_poll_application.controllers;
 
 import io.zipcoder.tc_spring_poll_application.domain.Vote;
 import io.zipcoder.tc_spring_poll_application.repositories.VoteRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.inject.Inject;
 
-@Controller
+@RestController
 public class VoteController {
 
-    @Inject
+    @Autowired
     private VoteRepository voteRepository;
 
     @PostMapping("/polls/{pollId}/votes")
-    public ResponseEntity<?> createVote(@PathVariable Long pollId, @RequestBody Vote vote) {
+    public ResponseEntity<?> createVote(@PathVariable Long pollId, @RequestBody Vote
+            vote) {
         vote = voteRepository.save(vote);
+        // Set the headers for the newly created resource
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.setLocation(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(vote.getId()).toUri());
+        responseHeaders.setLocation(ServletUriComponentsBuilder.
+                fromCurrentRequest().path("/{id}").buildAndExpand(vote.getId()).toUri());
         return new ResponseEntity<>(null, responseHeaders, HttpStatus.CREATED);
     }
 
     @GetMapping("/polls/votes")
-    public ResponseEntity<Iterable<Vote>> getAllVotes() {
-        Iterable<Vote> response = voteRepository.findAll();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public Iterable<Vote> getAllVotes() {
+        return voteRepository.findAll();
     }
 
-    @GetMapping("/polls/{pollId}/votes")
+    @GetMapping("/polls/{pollId}/votes/")
     public Iterable<Vote> getVote(@PathVariable Long pollId) {
         return voteRepository.findVotesByPoll(pollId);
     }
-
-    @GetMapping("/polls/{pollId}/vote")
-    public ResponseEntity<Vote> getVote1(@PathVariable Long pollId) {
-        Vote response = voteRepository.findOne(pollId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
 
 }
